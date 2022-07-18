@@ -1,3 +1,6 @@
+'''
+commom tools
+'''
 import numpy as np
 import math
 import os
@@ -5,14 +8,8 @@ import random
 import matplotlib.pyplot as plt
 
 def mkdir(path):
-    #判斷目錄是否存在
-    #存在：True
-    #不存在：False
     folder = os.path.exists(path)
-
-    #判斷結果
     if not folder:
-        #如果不存在，則建立新目錄
         os.makedirs(path)
         print('-----create successfully-----')
 
@@ -22,27 +19,16 @@ def ha_z(t,t0,khap,a_rs,iang):
     z[(phi/(2*np.pi)-0.25)%1<0.5] = z.max()
     return z
 
-#fold function, 以tfold(period)為基準摺疊整段的LC
+
 def fold(tfold,tmid,flux,timestep):
     tmid0=[tmid[i]-tmid[0] for i in range(len(tmid))]
-    Td = np.array(tmid0) % tfold  # tmid折疊後的數值list
-    interval = timestep / 1440.0  # 隔出幾個區間
+    Td = np.array(tmid0) % tfold
+    interval = timestep / 1440.0
     tn = math.ceil(tfold / interval)
-    #interval_t = [(timestep / 2) / 1440.0 +interval * i for i in range(tn)]  # interval time pt
-    interval_t=[interval*i for i in range(tn)]#interval time pt
+    interval_t=[interval*i for i in range(tn)]
     interval_flux = [[] for i in range(tn)]
     average_flux = []
 
-    # 尋找所屬區間
-    '''
-    for i in range(len(Td)):
-        for j in range(len(interval_t)):
-            a = interval_t[j]
-            b = (j + 1) * interval
-            if (Td[i] < b and Td[i] >= a):
-                interval_flux[j].append(flux[i])
-                break
-    '''
     for j in range(len(interval_t)):
         a=interval_t[j]
         b=(j+1)*interval
@@ -50,34 +36,32 @@ def fold(tfold,tmid,flux,timestep):
         for i in candidate_index:
             interval_flux[j].append(flux[i])
 
-    # interval average flux
     for i in range(len(interval_flux)):
         average_flux.append(np.mean(interval_flux[i]))
 
-    # 區間時間段→區間中點list
     interval_t = [(timestep / 2) / 1440.0 + interval * i for i in range(tn)]
 
     return interval_t, average_flux,interval_flux
 
 def interpolation(t,flux,tfold,new_interval_num):
 
-    delta_t0=tfold/len(t) #old interval length
-    delta_t = tfold/new_interval_num #new interval length
+    delta_t0=tfold/len(t)
+    delta_t = tfold/new_interval_num
 
     interval_it=[(delta_t/2)+delta_t*i for i in range(new_interval_num)]
 
-    new_iflux=[0 for i in range(new_interval_num)] #新flux列表
+    new_iflux=[0 for i in range(new_interval_num)]
 
     temp=0
     for i in range(1,len(t)):
         for j in range(temp,new_interval_num):
             if (0<interval_it[j]<t[0]):
-                new_iflux[j] = 1 + ((interval_it[j]) / (delta_t0/2)) * (flux[i-1] - 1)#new flux 第一點
+                new_iflux[j] = 1 + ((interval_it[j]) / (delta_t0/2)) * (flux[i-1] - 1)
                 continue
             elif(t[i-1]<interval_it[j]<t[i]):
                 new_iflux[j]=flux[i-1]+((interval_it[j]-t[i-1])/delta_t0)*(flux[i]-flux[i-1])
                 continue
-            elif(t[-1]<interval_it[j]): #如果落在最後一個區間
+            elif(t[-1]<interval_it[j]):
                 new_iflux[j]=flux[-1]+(((interval_it[-1] - (t[-1]+delta_t0/2)) / delta_t0) * ( 1- flux[-1]))
                 continue
             elif(interval_it[j]>t[i-1] and interval_it[j]>t[i]):
@@ -91,7 +75,7 @@ def interpolation(t,flux,tfold,new_interval_num):
         random_num=[]
     
         for i in range(len(new_iflux)):
-            if (mean-n*sigma)<=new_iflux[i]<=(mean+n*sigma): #設不要2倍sigma以外的值
+            if (mean-n*sigma)<=new_iflux[i]<=(mean+n*sigma):
                 random_num.append(new_iflux[i])
     
         n=np.where(np.isnan(new_iflux))
@@ -99,7 +83,6 @@ def interpolation(t,flux,tfold,new_interval_num):
         for i in range(len(n[0])):
             new_iflux[n[0][i]]=random.choice(random_num)
 
-    
     return interval_it,new_iflux
 
 def parameter(index,param):
@@ -150,5 +133,3 @@ def error_param_histgram(column_name,xlabel,path):
     plt.xlabel(xlabel)
     plt.ylabel('N')
     plt.savefig(path+'error_param_record_histgram-'+xlabel)
-    #plt.show()
-    #plt.close()
