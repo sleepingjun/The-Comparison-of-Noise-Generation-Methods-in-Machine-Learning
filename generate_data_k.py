@@ -1,13 +1,17 @@
+'''
+to generate k dataset.
+'''
+
 import numpy as np
 from tool import ha_z,fold,interpolation,mkdir
-from mangol import mandel_agol as mangol #limb darkening
+from mangol import mandel_agol as mangol
 import time
 import os
 import matplotlib.pylab as plt
 
 np.random.seed(1)
 s=time.time()
-def save_record(t,flux,label,rp_rs,a_rs,iang,t0,khap,sigma):#儲存(save)的函數
+def save_record(t,flux,label,rp_rs,a_rs,iang,t0,khap,sigma):
     time_record.extend([t])
     LC_record.extend([flux])
     label_record.append(np.float64(label))
@@ -23,10 +27,9 @@ noisepath=os.path.join(os.getcwd(),'Kplr')
 timebar=np.load(os.path.join(noisepath,'kepler_data_based_time.npy'),allow_pickle=True)
 fluxbar=np.load(os.path.join(noisepath,'kepler_data_based_flux.npy'),allow_pickle=True)
 id=np.loadtxt(os.path.join(noisepath,'kepler_data_based_filename.txt'),unpack=True)
-'''print(np.where(id==1027900))
-print(id[77])'''
 
-Ns=[16000]
+
+Ns=[2000,4000,8000,12000,16000,20000]
 for i in range(len(Ns)):
 
     s=time.time()
