@@ -1,3 +1,8 @@
+'''
+pre-processing datas from selected kepler Q1 dataset.
+plot the process.
+'''
+
 import numpy as np
 import math
 import random
@@ -5,10 +10,10 @@ import matplotlib.pylab as plt
 import os
 import time
 
-
-#把有nan的index整個去掉
 def delnan(data):
-    
+    '''
+    to delete nan value from the original data.
+    '''
     t=list(data[0])
     f=list(data[1])
     for i in range(len(f)):
@@ -23,24 +28,22 @@ def delnan(data):
 
     return t,f
 
-#time interval
 def predeal(tmid,flux,time_step):
-    
+    '''time interval'''
     time_step=15.0
-    tmid=tmid-np.amin(tmid) #時間平移到最左側，global time
-    t_index=len(tmid) #time總長度
-    dt_half=(time_step/2)/1440.0 #時間區段半寬
-    interval_length=time_step/1440.0 #時間區段寬
-    if tmid[-1]%interval_length==0:#tmid可被time_step整除
-        interval_num=int(tmid[-1]/interval_length)#區間個數
+    tmid=tmid-np.amin(tmid)
+    t_index=len(tmid)
+    dt_half=(time_step/2)/1440.0
+    interval_length=time_step/1440.0
+    if tmid[-1]%interval_length==0:
+        interval_num=int(tmid[-1]/interval_length)
     else:
-        interval_num=int(tmid[-1]/interval_length)+1#多+1是因為最後一個區間照原本的會不足一個區間寬，但他是存在的
-    t=np.array([interval_length*i for i in range(interval_num+1)])#區間間隔t
-    
-    #step1.count the number and record newinterval flux,有多個點就取點點們的平均再紀錄
+        interval_num=int(tmid[-1]/interval_length)+1
+    t=np.array([interval_length*i for i in range(interval_num+1)])
+
     np_out=np.zeros(interval_num)
     f_record=np.full([interval_num],np.nan)
-    for i in range(0,interval_num):#interval_num
+    for i in range(0,interval_num):
         index_oldtime=[]
         index_newtime=[]
         for k in range(len(tmid)):
@@ -53,7 +56,6 @@ def predeal(tmid,flux,time_step):
             
         for a in index_oldtime:
             for b in index_newtime:
-                    
                 record=[]
                 record.append(flux[a])
                 f_record[b]=np.sum(record)/np_out[b]               
@@ -95,8 +97,10 @@ def predeal(tmid,flux,time_step):
 
     return middle_t,f_record
 
-#minus n times dev
 def minus_dev(t,f,n):
+    '''
+    minus n times dev
+    '''
     sigma=np.nanstd(f)
     mean=np.nanmean(f)
     
@@ -110,13 +114,12 @@ def minus_dev(t,f,n):
 
     return t1,f1
 
-#fold function, 以tfold(period)為基準摺疊整段的LC
 def fold(tfold,tmid,flux,timestep):
 
-    Td=np.array(tmid)%tfold #tmid折疊後的數值list
-    interval=timestep/1440.0 #隔出幾個區間
-    tn=math.ceil(tfold/interval) #interval time's length
-    interval_t=[interval*i for i in range(tn)]#interval time pt
+    Td=np.array(tmid)%tfold
+    interval=timestep/1440.0
+    tn=math.ceil(tfold/interval)
+    interval_t=[interval*i for i in range(tn)]
     interval_flux=[[]for i in range(tn)]
     average_flux=[]
 
@@ -134,45 +137,44 @@ def fold(tfold,tmid,flux,timestep):
 
     return interval_t,average_flux
 
-#def inter_pt
 def inter_nullpt(flux,n):
-    
+    '''insert random value from others.'''
     sigma=np.nanstd(flux)
     mean=np.nanmean(flux)
     
     random_num=[]
 
     for i in range(len(flux)):
-        if (mean-n*sigma)<=flux[i]<=(mean+n*sigma): #設不要2倍sigma以外的值
+        if (mean-n*sigma)<=flux[i]<=(mean+n*sigma):
             random_num.append(flux[i])
-            
-        
+
     n=np.where(np.isnan(flux))
     flux=list(flux)
     for i in range(len(n[0])):
         flux[n[0][i]]=random.choice(random_num)
-    #flux=np.array(flux)
+
     return flux
 
 
 def interpolation(t, flux, tfold, new_interval_num):
-    delta_t0 = tfold / len(t)  # old interval length
-    delta_t = tfold / new_interval_num  # new interval length
+    '''interpolation method'''
+    delta_t0 = tfold / len(t)
+    delta_t = tfold / new_interval_num
 
     interval_it = [(delta_t / 2) + delta_t * i for i in range(new_interval_num)]
 
-    new_iflux = [0 for i in range(new_interval_num)]  # 新flux列表
+    new_iflux = [0 for i in range(new_interval_num)]
 
     temp = 0
     for i in range(1, len(t)):
         for j in range(temp, new_interval_num):
             if (0 < interval_it[j] < t[0]):
-                new_iflux[j] = 1 + ((interval_it[j]) / (delta_t0 / 2)) * (flux[i - 1] - 1)  # new flux 第一點
+                new_iflux[j] = 1 + ((interval_it[j]) / (delta_t0 / 2)) * (flux[i - 1] - 1)
                 continue
             elif (t[i - 1] < interval_it[j] < t[i]):
                 new_iflux[j] = flux[i - 1] + ((interval_it[j] - t[i - 1]) / delta_t0) * (flux[i] - flux[i - 1])
                 continue
-            elif (t[-1] < interval_it[j]):  # 如果落在最後一個區間
+            elif (t[-1] < interval_it[j]):
                 new_iflux[j] = flux[-1] + (((interval_it[-1] - (t[-1] + delta_t0 / 2)) / delta_t0) * (1 - flux[-1]))
                 continue
             elif (interval_it[j] > t[i - 1] and interval_it[j] > t[i]):
@@ -186,7 +188,7 @@ def interpolation(t, flux, tfold, new_interval_num):
         random_num = []
 
         for i in range(len(new_iflux)):
-            if (mean - n * sigma) <= new_iflux[i] <= (mean + n * sigma):  # 設不要2倍sigma以外的值
+            if (mean - n * sigma) <= new_iflux[i] <= (mean + n * sigma):
                 random_num.append(new_iflux[i])
 
         n = np.where(np.isnan(new_iflux))
@@ -310,16 +312,16 @@ for file in os.listdir(os.path.join(os.getcwd(),'kplr_data')):
             if np.isnan(f_fold1).sum() == 0:
                 #print(id, '-', i)
                 f_fold1 = inter_nullpt(f_fold1, 2)
-                '''plt.plot(t_fold1, f_fold1_inter, 'r.',label='inter null pt')
+                plt.plot(t_fold1, f_fold1_inter, 'r.',label='inter null pt')
                 plt.plot(t_fold1, f_fold1, 'b.',label='original')
                 plt.legend()
                 plt.xlabel('Time(day)')
                 plt.ylabel('flux')
                 plt.tight_layout()
                 plt.savefig(str(id) + 'inter_nullpt.png')
-                plt.close()'''
+                plt.close()
 
-                '''plt.plot(t_fold1, f_fold1_inter, 'b.', label='tfold=' + str(np.around(tfold[1], 3)))
+                plt.plot(t_fold1, f_fold1_inter, 'b.', label='tfold=' + str(np.around(tfold[1], 3)))
                 plt.legend(loc='upper right')
                 plt.xlabel('Time(day)')
                 plt.ylabel('flux')
@@ -354,7 +356,7 @@ for file in os.listdir(os.path.join(os.getcwd(),'kplr_data')):
                 plt.ylabel('flux')
                 plt.tight_layout()
                 plt.savefig(str(id) + 'interpolation.png')
-                plt.close()'''
+                plt.close()
             ax[i].plot(t_fold1,f_fold1,'steelblue',label='noise')
             ax[i].plot(st_fold1, sf_fold1, 'sandybrown', label='transit')
             ax[i].legend(loc='lower left')
