@@ -1,3 +1,7 @@
+'''
+K-Fold Cross-Validation, training method and model structure.
+'''
+
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras import optimizers
