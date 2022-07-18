@@ -1,39 +1,23 @@
-#run後會把資料夾內有的fits都轉成txt
+'''
+To convert .fits to .txt
+'''
 import numpy as np
 import os
 import time
 from astropy.io import fits
 
-
 def mkdir(path):
-    #判斷目錄是否存在
-    #存在：True
-    #不存在：False
     folder = os.path.exists(path)
-
-    #判斷結果
     if not folder:
-        #如果不存在，則建立新目錄
         os.makedirs(path)
-        print('-----建立成功-----')
-
-    else:
-        #如果目錄已存在，則不建立，提示目錄已存在
-        print(path+'目錄已存在')
 
 path=os.getcwd()
-'''newfolder = os.path.join(path,'Class_Kplr_star')
-mkdir(newfolder)
-newfolder1 = os.path.join(path,'Class_Kplr_star_txt')
-mkdir(newfolder1)
-dirs=os.listdir(path)'''
 folder=os.path.join(path,'kplr_data')
 mkdir(folder)
-#count2=0
-#s=time.time()
+
 for file1 in dirs:
     fsize=os.path.getsize(file1)
-    if (file1[-1] =='s' and fsize >0): #偵測fits的s，所有檔案只要是fits的就拿來做 #fsize太小的不要
+    if (file1[-1] =='s' and fsize >0):
         hdul=fits.open(file1)
         print(hdul)
         ID=hdul[0].header['KEPLERID']

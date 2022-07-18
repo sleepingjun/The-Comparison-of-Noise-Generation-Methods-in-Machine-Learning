@@ -6,27 +6,21 @@ import os
 import time
 
 
-'''15mins 5sigma'''
 #把有nan的index整個去掉
 def delnan(data):
     
     t=list(data[0])
     f=list(data[1])
-    #找nan在哪個index
     for i in range(len(f)):
-        
-        if np.isnan(f).sum()>0:#n=np.where(np.isnan(f)) #n.type=tuple
-            #delete 有nan的部分
+        if np.isnan(f).sum()>0:
             n=np.where(np.isnan(f))
             t.pop(n[0][0])
             f.pop(n[0][0])
-            #pop後，整個後面的index會往前一格，等於是說要重新找nan的位置
-            continue #結束這次迴圈，開始下一個迴圈
+
+            continue
         else:
-            break#強制結束所有迴圈
-        
-    #tmid=np.array(t)
-    #flux=np.array(f)
+            break
+
     return t,f
 
 #time interval
