@@ -1,9 +1,7 @@
 
 ![python](https://img.shields.io/badge/Python-3.8-blue)
 ![tf](https://img.shields.io/badge/Tensorflow--GPU-2.5-orange)  
-![NumPy](https://img.shields.io/badge/numpy-%23013243.svg?style=for-the-badge&logo=numpy&logoColor=white)
-![Pandas](https://img.shields.io/badge/pandas-%23150458.svg?style=for-the-badge&logo=pandas&logoColor=white)
-![scikit-learn](https://img.shields.io/badge/scikit--learn-%23F7931E.svg?style=for-the-badge&logo=scikit-learn&logoColor=white)  
+
 
 ## Table of contents
 * [Introduction](#introduction)  
@@ -22,12 +20,16 @@ After  constructing several training datasets by using those two methods with th
 ## Environment  
 This project is created with:  
 * Python version: 3.8  
-* Tensorflow-gpu version: 2.5  
-* Numpy  
-* Matplotlib  
-* Scikit-learn  
-* Pandas
+* Tensorflow-gpu version: 2.5.0  
+* Numpy version: 1.20.3  
+* Matplotlib version: 3.4.2  
+* astropy version: 4.3.1  
 
+To install quickly:
+```
+pip install -r requirements.txt
+```
+  
 Notice:  
 If you want to use my code, please ensure package version especially tensorflow version. Sometimes when you used different version, it could be incompatible or some module have be deleted.
 
