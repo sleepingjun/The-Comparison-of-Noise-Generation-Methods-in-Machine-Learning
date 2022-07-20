@@ -2,9 +2,9 @@
 ![python](https://img.shields.io/badge/Python-3.8-blue)
 ![tf](https://img.shields.io/badge/Tensorflow--GPU-2.5-orange)  
 
-
 ## Table of contents
 * [Introduction](#introduction)  
+* [Background Knowledge](#background-knowledge)  
 * [Environment](#environment)  
 * [File Guide](#file-guide)  
 * [Reference](#reference)  
@@ -16,6 +16,14 @@ The methods of generated light curves are following:
 2. noise data generated from quasi-period system by [Pearson et al. (2019)](https://arxiv.org/abs/1706.04319)
   
 After  constructing several training datasets by using those two methods with theoretic light curve formula in [Mandel & Agol (2002)](https://arxiv.org/abs/astro-ph/0210099), we trained our CNN model with K-fold Cross-Validation. Then we selected the best method to search possible transit light curves for Kepler  dataset.
+
+## Background Knowledge  
+A planet that orbits a star outside the solar system is called an exoplanet.  
+There are many of methods to search exoplanets. The common methods are including: Doppler effect method, [transit method](https://exoplanets.nasa.gov/faq/31/whats-a-transit/), astrometry method and so on.  
+In this project, we used transit method and 1D CNN model to search whether there exists exoplanet candidates in Kepler Q1 dataset.  
+* Transit method:  
+  Because stars can emit stable light, planets cannot. Due to this property, when a plenet passes between a star and its observer, the bright emitted by this star drops. This is called a transit event.  
+[Transit event video source from NASA](https://exoplanets.nasa.gov/alien-worlds/ways-to-find-a-planet/)  
 
 ## Environment  
 This project is created with:  
@@ -34,14 +42,18 @@ Notice:
 If you want to use my code, please ensure package version especially tensorflow version. Sometimes when you used different version, it could be incompatible or some module have be deleted.
 
 ## File Guide  
+* To preprocess kepler datas.  
 `Kplr/compare_KM.py` - to record and compare magnitude of datas we had chosen from Kepler mission.  
 `Kplr/dev_analysis.py` - This file is to analyze sigma of our kepler datas.We divided them into 4 group and hoped to have at least 50 in each group.  
 `Kplr/look_star.py` - pre-processing datas from selected kepler mission.  
 `Kplr/read_fits.py` - To convert .fits to .txt  
+* To generate our training datasets.  
 `generate_data_k.py` - To generate training dataset using selected Kepler datas.  
 `generate_data_p.py` - To generate training dataset using quasi-period system.  
+* CNN  
 `model_structure.py` - Our 1D CNN model and training method(K-fold, early stop training)  
 `train.py` - To train our model for each sample size of dataset and record training time.  
+* important and useful tools.  
 `mangol.py` - the model to simulate transit event.  
 `tool.py` - some common tools we often used.  
 
